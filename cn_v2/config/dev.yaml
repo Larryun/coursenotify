@@ -1,0 +1,8 @@
+---
+manager:
+  db:
+    ip: "localhost"
+    port: 27017
+    username: ""
+    pass: ""
+
