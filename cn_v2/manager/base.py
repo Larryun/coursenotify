@@ -7,28 +7,48 @@ from cn_v2.util.logger import creat_stream_logger
 
 
 class BaseManager(object):
+    FH = "FH"
+    DA = "DA"
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, school, cursor=None):
+        self.school = school
         self.config = read_config(config_file)
         self.logger = creat_stream_logger("BaseManager")
 
         # setting up mongodb cursor
+        if not cursor:
+            self.__setup_cursor()
+        else:
+            self.cursor = cursor
+
+        self.check_mongo_connection()
+
+        self.db = self.cursor[self.config["manager"]["db"]["db_name"]]
+
+        self.__setup_collection()
+
+    def __setup_cursor(self):
         ip = self.config["manager"]["db"]["ip"]
         port = self.config["manager"]["db"]["port"]
         username = self.config["manager"]["db"]["username"]
         password = self.config["manager"]["db"]["pass"]
         self.cursor = self.__create_cursor(ip, port, username, password)
-        self.check_mongo_connection()
 
-    @staticmethod
-    def __create_cursor(ip, port, username, password):
+    def __setup_collection(self):
+        self.course_cc = self.db[self.config["manager"]["collection"][self.school.lower()]["course"]]
+        self.watcher_cc = self.db[self.config["manager"]["collection"][self.school.lower()]["watcher"]]
+
+    def __create_cursor(self, ip, port, username, password):
+        self.logger.debug("Connecting to DB")
         uri = "mongodb://%s:%s@%s:%s/?authSource=admin&authMechanism=SCRAM-SHA-1" % (username, password, ip, port)
-        return pymongo.MongoClient(uri, severSelectionTimeoutMS=50)
+        return pymongo.MongoClient(uri)
 
     def check_mongo_connection(self):
+        self.logger.debug("Checking connection to DB")
         try:
             self.cursor.server_info()
-            return 1
+            self.logger.debug("DB connected")
+            return True
         except ServerSelectionTimeoutError:
             self.logger.error("Connection to MongoDB timeout")
             self.logger.warning("Quitting...")
@@ -37,4 +57,3 @@ class BaseManager(object):
             self.logger.error("Fail to connect MongoDB")
             self.logger.warning("Quitting...")
             raise ConnectionFailure
-

@@ -4,6 +4,14 @@ manager:
   db:
     ip: "localhost"
     port: 27017
-    username: ""
-    pass: ""
+    username: "admin"
+    pass: "admin"
+    db_name: "dev_course_notify"
+  collection:
+    fh:
+      course: "fh_course"
+      watcher: "fh_watcher"
+    da:
+      course: "da_course"
+      watcher: "da_watcher"
 
