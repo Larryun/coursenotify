@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from cn_v2.parser.model import *
 from cn_v2.util.config import read_config
 from cn_v2.util.parser import *
+from cn_v2.util.logger import creat_stream_logger
 
 
 class Parser(object):
@@ -25,27 +26,24 @@ class Parser(object):
         if os.environ["env"] == "dev":
             self.DEBUG = True
 
-    @staticmethod
-    def debug_p(message):
-        if os.environ["env"] == "dev":
-            print("[DEBUG] " + message)
+        self.logger = creat_stream_logger("Parser")
 
     def get_soup(self, url, data, **kwargs):
         if self.DEBUG and os.path.isfile(self.HTML_FILE):
             return self.read_html()
-        self.debug_p("Retrieving html page")
+        self.logger.debug("Retrieving html page")
         rep = self.s.post(url, data=data)
         soup = BeautifulSoup(rep.text, "html.parser")
         return soup
 
     def read_html(self):
-        self.debug_p("Reading html page from %s" % self.HTML_FILE)
+        self.logger.debug("Reading html page from %s" % self.HTML_FILE)
         # Read html from file
         with open(self.HTML_FILE, "r") as f:
             return BeautifulSoup(f.read(), features="html.parser")
 
     def save_soup(self, soup):
-        self.debug_p("Saving html page")
+        self.logger.debug("Saving html page")
         # Save html to file
         with open(self.HTML_FILE, "w") as f:
             f.write(str(soup.prettify()))
@@ -60,6 +58,7 @@ class CourseParser(Parser):
         super(CourseParser, self).__init__(config_file)
         self.term_code = term_code or {self.DA: "202132", self.FH: "202131"}
         self.term = self.get_school_term_code(school)
+        self.logger.name = "Course Parser"
 
     def get_school_term_code(self, school):
         if school in [self.DA, self.FH]:
@@ -72,13 +71,13 @@ class CourseParser(Parser):
 
     def parse(self):
         soup = self.get_soup()
-        self.debug_p("Parsing")
+        self.logger.debug("Parsing")
         tables = soup.find_all("table")
-        courses = []
+        courses = set()
 
         for table in tables:
-            courses.extend(self._parse_table(table))
-        return list(set(courses))
+            courses = courses.union(set(self._parse_table(table)))
+        return list(courses)
 
     def _parse_table(self, table_soup):
         """
