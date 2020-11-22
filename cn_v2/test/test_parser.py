@@ -1,4 +1,5 @@
 import unittest
+
 from cn_v2.parser.course import *
 
 
@@ -10,6 +11,3 @@ class TestParser(unittest.TestCase):
         # p.save_soup(soup)
         result = list(set(p.parse()))
         print(len(result))
-
-
-

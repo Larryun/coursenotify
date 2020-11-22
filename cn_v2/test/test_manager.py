@@ -1,10 +1,10 @@
-import unittest
-import string
 import random
+import string
+import unittest
 
+from cn_v2.exception import *
 from cn_v2.manager.course import *
 from cn_v2.manager.watcher import *
-from cn_v2.exception import *
 
 CONFIG_FILE = "../config/test.yaml"
 

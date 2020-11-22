@@ -1,6 +1,6 @@
-from typing import Dict, List, Union
-from datetime import datetime
 import hashlib
+from datetime import datetime
+from typing import Dict, List, Union
 
 
 class CourseDocument(object):
@@ -55,7 +55,7 @@ class CourseDocument(object):
             return "%s - %s\n(%s)" % (self.crn, self.name, "ONLINE")
         else:
             return "%s - %s\n(%s)" % (
-            self.crn, self.name, "%s - %s" % (self.start_time.strftime("%H:%M"), self.end_time.strftime("%H:%M")))
+                self.crn, self.name, "%s - %s" % (self.start_time.strftime("%H:%M"), self.end_time.strftime("%H:%M")))
 
     def __repr__(self):
         return "%s - %s" % (self.crn, self.name)

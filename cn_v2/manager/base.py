@@ -1,4 +1,3 @@
-import yaml
 import pymongo
 from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
 

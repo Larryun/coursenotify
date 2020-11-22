@@ -2,9 +2,9 @@ from string import Template
 
 from cn_v2.exception import *
 from cn_v2.manager.base import BaseManager
-from cn_v2.util.email import Email, GmailAccount
 from cn_v2.parser.model import *
 from cn_v2.parser.model import gen_md5_key
+from cn_v2.util.email import GmailAccount
 
 
 class WatcherManager(BaseManager):
@@ -97,7 +97,7 @@ class WatcherManager(BaseManager):
 
         if res.matched_count == 0:
             raise WatcheeNotFound(email, crn)
-        self.logger.info("Remove watchee %s from watcher %s" % (email, crn))
+        self.logger.info("Remove watchee %s from watcher %s" % (crn, email))
 
     def is_watchee_removed(self, email, crn):
         course_id = self.find_course_by_crn(crn)["_id"]

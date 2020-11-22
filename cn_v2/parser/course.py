@@ -1,11 +1,12 @@
-import requests
 import os
+
+import requests
 from bs4 import BeautifulSoup
 
 from cn_v2.parser.model import *
 from cn_v2.util.config import read_config
-from cn_v2.util.parser import *
 from cn_v2.util.logger import BasicLogger
+from cn_v2.util.parser import *
 
 
 class Parser(object):

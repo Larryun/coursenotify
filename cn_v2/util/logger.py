@@ -21,4 +21,3 @@ class BasicLogger(logging.Logger):
         ch.setFormatter(self.formatter)
         ch.setLevel(self.level)
         self.addHandler(ch)
-
