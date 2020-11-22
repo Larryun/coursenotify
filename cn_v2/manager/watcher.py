@@ -8,6 +8,9 @@ from cn_v2.util.email import GmailAccount
 
 
 class WatcherManager(BaseManager):
+    FULLED = "Full"
+    WAITLIST = "Waitlist"
+    OPEN = "Open"
 
     def __init__(self, config_file, school, log_path="../data/watcher.log"):
         super(WatcherManager, self).__init__(config_file, school)
@@ -44,21 +47,33 @@ class WatcherManager(BaseManager):
     def find_course_by_id(self, course_id):
         # not tested
         result = self.course_cc.find_one({"_id": course_id})
-        self.logger.debug(result)
-        if len(result) == 0:
-            return None
-        else:
-            return result
+        # self.logger.debug(result)
+        # if result is None:
+        #     return None
+        # else:
+        #     return result
+        return result or None
+
+    def __update_watchee_status(self, email, course_id, new_status):
+        set_query = {"crn.$[course]." + k: new_status[k] for k in new_status.keys()}
+        # self.logger.debug(set_query)
+        self.watcher_cc.update_one({"email_addr": email},
+                                   {"$set": set_query},
+                                   array_filters=[{"course.course_obj_id": course_id}])
+
+    def update_watchee_notify_status(self, email, course_id, notify_status):
+        new_time = datetime.now()
+        self.__update_watchee_status(email, course_id, {
+            "notify_status": notify_status,
+            "notify_time": new_time
+        })
 
     def reset_watchee_status(self, email, course_id):
-        self.watcher_cc.update_one({"email_addr": email},
-                                   {"$set":
-                                       {
-                                           "crn.$[course].last_notify_status": "",
-                                           "crn.$[course].removed": False,
-                                           "crn.$[course].remove_key": gen_md5_key(12345)
-                                       }},
-                                   array_filters=[{"course.course_obj_id": course_id}])
+        self.__update_watchee_status(email, course_id, {
+            "notify_status": "",
+            "removed": False,
+            "remove_key": gen_md5_key(12345),
+        })
 
     def add_all_watchee(self, email, crn_list):
         for crn in crn_list:
@@ -104,3 +119,39 @@ class WatcherManager(BaseManager):
         res = self.watcher_cc.count_documents(
             {"email_addr": email, "crn.course_obj_id": course_id, "crn.removed": True})
         return res == 1
+
+    def find_not_removed_watchee(self, email):
+        res = self.watcher_cc.aggregate([
+            {"$match": {"email_addr": email}},
+            {"$project": {
+                "not_removed": {"$filter": {
+                    "input": "$crn",
+                    "as": "courses",
+                    "cond": {"$eq": ["$$courses.removed", False]}
+                }}
+            }}
+        ])
+        not_removed = []
+        for i in res:
+            not_removed.extend(i["not_removed"])
+        return not_removed
+
+    def __check_notify_status(self, watchee, current_status):
+        if watchee["removed"] or current_status == self.FULLED or current_status == watchee["notify_status"]:
+            return False
+        elif current_status == self.OPEN or current_status == self.WAITLIST:
+            return True
+        else:
+            return False
+
+    def notify(self, email):
+        notify_course = self.find_not_removed_watchee(email)
+        notified_count = 0
+        for i in notify_course:
+            course = self.find_course_by_id(i["course_obj_id"])
+            current_status = course["status"]
+            if self.__check_notify_status(i, current_status):
+                self.update_watchee_notify_status(email, i["course_obj_id"], current_status)
+                self.logger.info("Notify %s for course %s" % (email, i["course_obj_id"]))
+                notified_count += 1
+        return notified_count

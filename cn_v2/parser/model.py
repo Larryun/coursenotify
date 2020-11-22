@@ -68,11 +68,16 @@ class CourseDocument(object):
 
 
 class WatcheeDocument(object):
-    def __init__(self, course_obj_id: str, last_notify: datetime = None, last_notify_status: str = "", removed=False):
-        self.last_notify = last_notify or datetime(1, 1, 1, 1, 1, 1, 1)
+    def __init__(self, course_obj_id: str, notify_time: datetime = None, notify_status: str = "", removed=False):
+        # self.last_notify = last_notify or datetime(1, 1, 1, 1, 1, 1, 1)
+        # self.course_obj_id = course_obj_id
+        # self.remove_key = gen_md5_key(self.course_obj_id)
+        # self.last_notify_status = last_notify_status
+        # self.removed = removed
+        self.notify_time = notify_time or datetime(1, 1, 1, 1, 1, 1, 1)
         self.course_obj_id = course_obj_id
         self.remove_key = gen_md5_key(self.course_obj_id)
-        self.last_notify_status = last_notify_status
+        self.notify_status = notify_status
         self.removed = removed
 
 
