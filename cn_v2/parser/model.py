@@ -77,10 +77,10 @@ class WatcheeDocument(object):
 
 
 class WatcherDocument(object):
-    def __init__(self, course_obj_with_timestamp: Union[Dict, List[Dict]], email_addr: str):
-        if not isinstance(course_obj_with_timestamp, List):
-            course_obj_with_timestamp = [course_obj_with_timestamp]
+    def __init__(self, watchee: Union[Dict, List[Dict]], email_addr: str):
+        if not isinstance(watchee, List):
+            watchee = [watchee]
 
-        self.crn = course_obj_with_timestamp
+        self.courses = watchee
         self.email_addr = email_addr
 

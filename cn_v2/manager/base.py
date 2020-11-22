@@ -3,7 +3,7 @@ import pymongo
 from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
 
 from cn_v2.util.config import read_config
-from cn_v2.util.logger import creat_stream_logger
+from cn_v2.util.logger import BasicLogger
 
 
 class BaseManager(object):
@@ -13,7 +13,7 @@ class BaseManager(object):
     def __init__(self, config_file, school, cursor=None):
         self.school = school
         self.config = read_config(config_file)
-        self.logger = creat_stream_logger("BaseManager")
+        self.logger = BasicLogger("BaseManager")
 
         # setting up mongodb cursor
         if not cursor:
@@ -22,9 +22,7 @@ class BaseManager(object):
             self.cursor = cursor
 
         self.check_mongo_connection()
-
         self.db = self.cursor[self.config["manager"]["db"]["db_name"]]
-
         self.__setup_collection()
 
     def __setup_cursor(self):
@@ -57,3 +55,8 @@ class BaseManager(object):
             self.logger.error("Fail to connect MongoDB")
             self.logger.warning("Quitting...")
             raise ConnectionFailure
+
+    def __del__(self):
+        for handler in self.logger.handlers[:]:
+            handler.close()
+            self.logger.removeHandler(handler)

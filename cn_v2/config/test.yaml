@@ -6,7 +6,7 @@ manager:
     port: 27017
     username: "admin"
     pass: "admin"
-    db_name: "dev_course_notify"
+    db_name: "test_course_notify"
   collection:
     fh:
       course: "fh_course"

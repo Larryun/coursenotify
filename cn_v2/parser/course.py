@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from cn_v2.parser.model import *
 from cn_v2.util.config import read_config
 from cn_v2.util.parser import *
-from cn_v2.util.logger import creat_stream_logger
+from cn_v2.util.logger import BasicLogger
 
 
 class Parser(object):
@@ -23,10 +23,10 @@ class Parser(object):
                                              "Chrome/79.0.3945.130 Safari/537.36"})
 
         self.HTML_FILE = self.config["data-path"] + "course.html"
-        if os.environ["env"] == "dev":
+        if "env" not in os.environ or os.environ["env"] == "dev":
             self.DEBUG = True
 
-        self.logger = creat_stream_logger("Parser")
+        self.logger = BasicLogger("Parser")
 
     def get_soup(self, url, data, **kwargs):
         if self.DEBUG and os.path.isfile(self.HTML_FILE):

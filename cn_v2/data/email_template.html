@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Course Notification</title>
+        <style type="text/css">
+            * {
+                font-family: Arial, sans-serif;
+            }
+            .email-table{
+               background-color: aliceblue;
+                width: 100%;
+            }
+            .header-row {
+                text-align: center;
+                background-color: #f8f9fa;
+                font-size: 2rem;
+            }
+
+            .footer-row {
+                text-align: center;
+                background-color: #f8f9fa;
+                font-size: 0.5rem;
+            }
+        </style>
+     </head>
+<body>
+    <table class="email-table">
+        <tr class="header-row">
+            <td height="80px">
+                FHDA CourseNotify
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="email_body">
+                    <h1>Class $classname </h1>
+                    <h1>Current status: <span style="color: #007bff">$status</span></h1>
+                    <p>CRN: $crn</p>
+                    <p> We will send you next notification if there're changes on seats availability</p>
+                    <p>To stop watching this class, go <a href="$remove_url">here</a></p>
+                </div>
+            </td>
+        </tr>
+        <tr class="footer-row">
+            <td height="30px">
+                FHDA CourseNotify v0.99<br>
+                <span style="color: #2870be">
+                    Notice: This is not an official notification from FH/DA college.<br>
+                </span>
+            </td>
+    </tr>
+    </table>
+</body>
+</html>
