@@ -52,30 +52,30 @@ class TestWatcherManager(unittest.TestCase):
             results.append("".join(random.choice(letters) for j in range(email_length)) + "@gmail.com")
         return results
 
-    def drop_watchers(self, emails):
-        self.watcher_m.watcher_cc.delete_many({"email_addr": {"$in": emails}})
+    def create_watcher_data(self, num_emails, num_crns):
+        return self.get_random_email(num_emails), self.get_random_crn(num_crns)
 
-    def test_add_watchee(self):
-        emails = self.get_random_email(1)
-        crns = self.get_random_crn(20)
-        add_operation = 100
+    def add_test_watcher_data(self, num_emails, num_crns):
+        emails, crns = self.create_watcher_data(num_emails, num_crns)
         expected = {}
-        count = 0
-        while count < add_operation:
+        for c in crns:
             r = random.choice(emails)
-            c = random.choice(crns)
             if r not in expected:
                 expected[r] = {c}
             else:
                 expected[r].add(c)
-            count += 1
 
         for k in expected.keys():
             self.watcher_m.add_all_watchee(k, expected[k])
+        return emails, crns, expected
 
-        for email in emails:
-            if email not in expected or len(expected[email]) == 0:
-                continue
+    def drop_watchers(self, emails):
+        self.watcher_m.watcher_cc.delete_many({"email_addr": {"$in": emails}})
+
+    def test_add_watchee(self):
+        emails, crns, expected = self.add_test_watcher_data(10, 20)
+
+        for email in expected:
             result_crn = set(
                 [x["course_obj_id"] for x in self.watcher_m.watcher_cc.find_one({"email_addr": email})["crn"]])
             expected_crn = set([self.watcher_m.find_course_by_crn(x)["_id"] for x in expected[email]])
@@ -83,6 +83,24 @@ class TestWatcherManager(unittest.TestCase):
 
         self.drop_watchers(emails)
 
+    def test_remove_watchee(self):
+        emails, crns, expected = self.add_test_watcher_data(10, 20)
+        remove_count = 10
+        expected_removed = {}
+        for i in range(remove_count):
+            email = random.choice(list(expected.keys()))
+            crn = random.choice(list(expected[email]))
+            if email not in expected_removed:
+                expected_removed[email] = [crn]
+            else:
+                expected_removed[email].append(crn)
+
+        for k in expected_removed:
+            for c in expected_removed[k]:
+                self.watcher_m.remove_watchee_by_crn(k, c)
+                self.assertTrue(self.watcher_m.is_watchee_removed(k, c))
+
+        self.drop_watchers(emails)
 
 
 class TestWatchManager_(unittest.TestCase):

@@ -1,9 +1,10 @@
 from string import Template
 
-from cn_v2.exception import CRNNotFound
+from cn_v2.exception import *
 from cn_v2.manager.base import BaseManager
 from cn_v2.util.email import Email, GmailAccount
 from cn_v2.parser.model import *
+from cn_v2.parser.model import gen_md5_key
 
 
 class WatcherManager(BaseManager):
@@ -54,7 +55,8 @@ class WatcherManager(BaseManager):
                                    {"$set":
                                        {
                                            "crn.$[course].last_notify_status": "",
-                                           "crn.$[course].removed": False
+                                           "crn.$[course].removed": False,
+                                           "crn.$[course].remove_key": gen_md5_key(12345)
                                        }},
                                    array_filters=[{"course.course_obj_id": course_id}])
 
@@ -73,3 +75,32 @@ class WatcherManager(BaseManager):
         else:
             self.logger.info("Watchee %s already exists in watcher %s" % (course_id, email))
             self.reset_watchee_status(email, course_id)
+
+    def remove_watchee_by_remove_key(self, email, remove_key):
+        res = self.watcher_cc.update_one({"email_addr": email},
+                                         {"$set": {
+                                             "crn.$[course].removed": True
+                                         }},
+                                         array_filters=[{"course.remove_key": remove_key}])
+
+        if res.matched_count == 0:
+            raise RemoveKeyNotFound(email, remove_key)
+        self.logger.info("Remove watchee with remove_key %s from watcher %s" % (remove_key, email))
+
+    def remove_watchee_by_crn(self, email, crn):
+        course_id = self.find_course_by_crn(crn)["_id"]
+        res = self.watcher_cc.update_one({"email_addr": email},
+                                         {"$set": {
+                                             "crn.$[course].removed": True
+                                         }},
+                                         array_filters=[{"course.course_obj_id": course_id}])
+
+        if res.matched_count == 0:
+            raise WatcheeNotFound(email, crn)
+        self.logger.info("Remove watchee %s from watcher %s" % (email, crn))
+
+    def is_watchee_removed(self, email, crn):
+        course_id = self.find_course_by_crn(crn)["_id"]
+        res = self.watcher_cc.count_documents(
+            {"email_addr": email, "crn.course_obj_id": course_id, "crn.removed": True})
+        return res == 1

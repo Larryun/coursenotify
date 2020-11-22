@@ -54,7 +54,8 @@ class CourseDocument(object):
         if self.room == "ONLINE" or self.class_time == "TBA":
             return "%s - %s\n(%s)" % (self.crn, self.name, "ONLINE")
         else:
-            return "%s - %s\n(%s)" % (self.crn, self.name, "%s - %s" % (self.start_time.strftime("%H:%M"), self.end_time.strftime("%H:%M")))
+            return "%s - %s\n(%s)" % (
+            self.crn, self.name, "%s - %s" % (self.start_time.strftime("%H:%M"), self.end_time.strftime("%H:%M")))
 
     def __repr__(self):
         return "%s - %s" % (self.crn, self.name)
@@ -70,8 +71,7 @@ class WatcheeDocument(object):
     def __init__(self, course_obj_id: str, last_notify: datetime = None, last_notify_status: str = "", removed=False):
         self.last_notify = last_notify or datetime(1, 1, 1, 1, 1, 1, 1)
         self.course_obj_id = course_obj_id
-        h = hashlib.md5((str(self.course_obj_id) + datetime.now().strftime("%m/%d/%Y %H:%M:%S")).encode())
-        self.remove_key = h.hexdigest()
+        self.remove_key = gen_md5_key(self.course_obj_id)
         self.last_notify_status = last_notify_status
         self.removed = removed
 
@@ -84,3 +84,7 @@ class WatcherDocument(object):
         self.courses = watchee
         self.email_addr = email_addr
 
+
+def gen_md5_key(salt):
+    h = hashlib.md5(str(str(salt) + datetime.now().strftime("%m/%d/%Y %H:%M:%S")).encode())
+    return h.hexdigest()
