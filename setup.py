@@ -2,7 +2,7 @@ import setuptools
 
 
 setuptools.setup(
-    name="CourseNotify",
+    name="cn2",
     version="1.2.00",
     author="CourseNotify",
     author_email="",
