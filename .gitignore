@@ -1,3 +1,6 @@
 /venv/
 /cn_v2/data/
 /cn_v2/config/dev.yaml
+/cn_v2/CourseNotify_v2.egg-info/
+/cn_v2/dist/
+/cn_v2/CourseNotify.egg-info/

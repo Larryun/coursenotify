@@ -57,7 +57,7 @@ class TestWatcherManager(unittest.TestCase):
     def add_test_watcher(self, num_emails, num_crns):
         emails, crns = self.create_watcher_data(num_emails, num_crns)
         expected = {}
-        trial_count = 100
+        trial_count = int((num_emails + num_crns) / 2)
         count = 0
         while count < trial_count:
             r = random.choice(emails)
@@ -76,7 +76,7 @@ class TestWatcherManager(unittest.TestCase):
         self.watcher_m.watcher_cc.delete_many({"email_addr": {"$in": emails}})
 
     def test_add_watchee(self):
-        emails, crns, expected = self.add_test_watcher(10, 20)
+        emails, crns, expected = self.add_test_watcher(100, 200)
 
         for email in expected:
             result_crn = set(
@@ -88,8 +88,8 @@ class TestWatcherManager(unittest.TestCase):
         self.drop_watchers(emails)
 
     def test_remove_watchee(self):
-        emails, crns, expected = self.add_test_watcher(10, 20)
-        remove_count = 10
+        emails, crns, expected = self.add_test_watcher(100, 200)
+        remove_count = 400
         expected_removed = {}
         for i in range(remove_count):
             email = random.choice(list(expected.keys()))
