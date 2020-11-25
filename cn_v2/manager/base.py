@@ -22,6 +22,7 @@ class BaseManager(object):
 
         self.check_mongo_connection()
         self.db = self.cursor[self.config["manager"]["db"]["db_name"]]
+        self.logger.debug(self.db)
         self.__setup_collection()
 
     def __setup_cursor(self):

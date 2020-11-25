@@ -21,5 +21,6 @@ setuptools.setup(
         "pymongo>=3.10.1",
         "requests>=2.22.0",
         "beautifulsoup4>=4.7.1",
+        "PyYAML==5.3.1",
     ]
 )

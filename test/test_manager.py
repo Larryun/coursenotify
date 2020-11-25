@@ -12,6 +12,7 @@ class TestCourseManager(unittest.TestCase):
 
     def test_run(self):
         m = CourseManager(CONFIG_FILE, BaseManager.DA)
+        m.update_course_collection()
 
     def test_update_course_collection(self):
         m = CourseManager(CONFIG_FILE, BaseManager.DA)
