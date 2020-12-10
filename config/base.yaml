@@ -1,11 +1,14 @@
 ---
 data-path: "../data/"
+host-url: ""
+debug: false
 manager:
   db:
     ip: ""
     port:
     username: ""
     pass: ""
+    selectionTimeout: 500
     db_name: ""
   collection:
     fh:
@@ -14,6 +17,7 @@ manager:
     da:
       course: ""
       watcher: ""
-  email:
-    username: ""
-    pass: ""
+email:
+  template: ""
+  username: ""
+  pass: ""
