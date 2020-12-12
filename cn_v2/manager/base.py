@@ -3,6 +3,7 @@ from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
 
 from cn_v2.util.config import read_config
 from cn_v2.util.logger import BasicLogger
+from cn_v2.exception import SchoolInvalid
 
 from logging import DEBUG, INFO
 
@@ -13,6 +14,8 @@ class BaseManager(object):
 
     def __init__(self, config_file, school, cursor=None):
         self.school = school
+        if school != "FH" and school != "DA":
+            raise SchoolInvalid(school)
         self.config = read_config(config_file)
         self.logger = BasicLogger("BaseManager")
         if not self.config["debug"]:

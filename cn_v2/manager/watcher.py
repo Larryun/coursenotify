@@ -68,7 +68,7 @@ class WatcherManager(BaseManager):
         self.__update_watchee_status(email, course_id, {
             "notify_status": "",
             "removed": False,
-            "remove_key": gen_md5_key(12345),
+            "remove_key": gen_md5_key(course_id),
         })
 
     def add_all_watchee(self, email, crn_list):
@@ -99,23 +99,25 @@ class WatcherManager(BaseManager):
             self.logger.info("Watchee %s already exists in watcher %s" % (course_id, email))
             self.reset_watchee_status(email, course_id)
 
-    def remove_watchee_by_remove_key(self, email, remove_key):
+    # TODO: add test
+    def remove_watchee_by_remove_key(self, remove_key):
         """
         Remove a watchee by a remove_key, raise RemoveKeyNotFound when the remove cannot
         be found in any watchee
-        :param email: watcher email
         :param remove_key: remove_key
         :return:
         """
-        res = self.watcher_cc.update_one({"email_addr": email},
+        res = self.watcher_cc.update_one({"crn.remove_key": remove_key},
                                          {"$set": {
                                              "crn.$[course].removed": True
                                          }},
                                          array_filters=[{"course.remove_key": remove_key}])
 
         if res.matched_count == 0:
-            raise RemoveKeyNotFound(email, remove_key)
-        self.logger.info("Remove watchee with remove_key %s from watcher %s" % (remove_key, email))
+            raise RemoveKeyNotFound(remove_key)
+        if res.modified_count == 0:
+            raise RemoveKeyUsed(remove_key)
+        self.logger.info("Remove watchee with remove_key %s" % (remove_key))
 
     def remove_watchee_by_crn(self, email, crn):
         """
@@ -176,6 +178,14 @@ class WatcherManager(BaseManager):
         for i in res:
             not_removed.extend(i["not_removed"])
         return not_removed
+
+    def find_watcher_by_remove_key(self, remove_key):
+        """
+        Find watcher that contains the watchee with the remove_key
+        :param remove_key: watchee's remove key
+        :return: watcher
+        """
+        return self.watcher_cc.find_one({"crn.remove_key": remove_key})
 
     def notify(self, email):
         """

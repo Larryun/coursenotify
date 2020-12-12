@@ -38,3 +38,8 @@ class CourseManager(BaseManager):
         # else:
         #     return result
         return result or None
+
+    def find_course_by_crn_prefix(self, crn, projection=None):
+        projection = projection or {"_id": 0, "title": 1, "name": 1, "crn": 1, "status": 1, }
+        courses = self.course_cc.find({"crn": {"$regex": "^" + str(crn)}}, projection)
+        return courses

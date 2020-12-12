@@ -65,7 +65,7 @@ class CourseParser(Parser):
         if school in [self.DA, self.FH]:
             return self.term_code[school]
         else:
-            raise RuntimeError("School invalid")
+            raise RuntimeError("School %s invalid" % school)
 
     def get_soup(self, **kwargs):
         return super().get_soup(self.COURSE_URL, {"termcode": self.term})
