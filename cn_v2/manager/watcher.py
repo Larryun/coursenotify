@@ -1,11 +1,9 @@
-from string import Template
-
 from cn_v2.exception import *
 from cn_v2.manager.base import BaseManager
 from cn_v2.manager.course import CourseManager
+from cn_v2.manager.notify import NotifyManger
 from cn_v2.parser.model import *
 from cn_v2.parser.model import gen_md5_key
-from cn_v2.util.email import GmailAccount, Email
 
 
 class WatcherManager(BaseManager):
@@ -14,12 +12,12 @@ class WatcherManager(BaseManager):
     OPEN = "Open"
 
     def __init__(self, config_file, school, log_path="../data/watcher.log", cursor=None):
-        super(WatcherManager, self).__init__(config_file, school)
+        super(WatcherManager, self).__init__(config_file, school, cursor=cursor)
         self.logger.name = "WatcherManager-%s" % school
         self.logger.add_file_handler(log_path)
         self.course_manger = CourseManager(config_file, school, cursor=self.cursor)
-
-        self.email_client = None
+        self.notify_manager = NotifyManger(config_file, school, cursor=self.cursor)
+        self.logger.debug("Finish initializing %s" % self.logger.name)
 
     def get_watcher(self, email):
         """
@@ -71,24 +69,27 @@ class WatcherManager(BaseManager):
             "remove_key": gen_md5_key(course_id),
         })
 
-    def add_all_watchee(self, email, crn_list):
+    def add_all_watchee(self, email, crn_list, confirmation=False):
         """
         add watchees by list of crns to a watcher with given email
         :param email: watcher email
         :param crn_list: array of crns to be added
+        :param confirmation: whether send confirmation email or not
         :return:
         """
         for crn in crn_list:
-            self.add_watchee(email, crn)
+            self.add_watchee(email, crn, confirmation)
 
-    def add_watchee(self, email, crn):
+    def add_watchee(self, email, crn, confirmation=False):
         """
         add a watchee with given crn to a watcher
         :param email: watcher email
         :param crn: crn (Ex. 31234)
+        :param confirmation: whether send confirmation email or not
         :return:
         """
-        course_id = self.course_manger.find_course_by_crn(crn)["_id"]
+        course = self.course_manger.find_course_by_crn(crn)
+        course_id = course["_id"]
         watchee = WatcheeDocument(course_id)
         if self.watcher_cc.count_documents({"email_addr": email, "crn.course_obj_id": course_id}) == 0:
             self.logger.info("Add watchee %s to watcher %s" % (course_id, email))
@@ -98,6 +99,8 @@ class WatcherManager(BaseManager):
         else:
             self.logger.info("Watchee %s already exists in watcher %s" % (course_id, email))
             self.reset_watchee_status(email, course_id)
+        if confirmation:
+            self.notify_manager.send_confirmation_email(watchee.remove_key, course, email)
 
     # TODO: add test
     def remove_watchee_by_remove_key(self, remove_key):
@@ -195,60 +198,18 @@ class WatcherManager(BaseManager):
         """
         notify_course = self.find_not_removed_watchee(email)
         notified_count = 0
-        for i in notify_course:
-            course = self.course_manger.find_course_by_id(i["course_obj_id"])
+        for watchee in notify_course:
+            course = self.course_manger.find_course_by_id(watchee["course_obj_id"])
             current_status = course["status"]
-            if self.__check_notify_status(i, current_status):
-                self.logger.info("Notify %s for course %s" % (email, i["course_obj_id"]))
+            if self.__check_notify_status(watchee, current_status):
+                self.logger.info("Notify %s for course %s" % (email, watchee["course_obj_id"]))
                 # TODO add worker for send email
-                self.send_notification_email(self.compose_notify_email(i, course, email))
-                self.update_watchee_notify_status(email, i["course_obj_id"], current_status)
+                self.notify_manager.send_notification_email(watchee["remove_key"],
+                                                            course,
+                                                            email)
+                self.update_watchee_notify_status(email, watchee["course_obj_id"], current_status)
                 notified_count += 1
         return notified_count
-
-    def send_notification_email(self, email):
-        """
-        Send email
-        :param email: Email object to be sent
-        :return:
-        """
-        self.__get_email_client().send_email(email)
-        self.logger.info("Sent email from %s to %s" % (email.sent_from, email.to))
-
-    @staticmethod
-    def __render_email_template(email_template, content):
-        """
-        Render a email template with the given content
-        :param email_template: path to email template
-        :param content: a dict, content to be substituted
-        :return: rendered email in str
-        """
-        with open(email_template) as f:
-            body = Template(f.read()).substitute(content)
-            return body
-
-    def __get_email_client(self):
-        if self.email_client is None:
-            self.email_client = GmailAccount(self.config["email"]["username"], self.config["email"]["pass"])
-        return self.email_client
-
-    def compose_notify_email(self, watchee, course, recipient_email):
-        """
-        Composes notification email
-        :param watchee: watchee dict for remove_url
-        :param course: course dict
-        :param recipient_email:
-        :return: composed Email object
-        """
-        subject = "%s Class Notification" % self.school
-        remove_url = self.config["host-url"] + ("/remove/%s/%s" % (self.school.lower(), watchee["remove_key"]))
-
-        # render email template
-        content = {"status": course["status"], "classname": course["name"],
-                   "remove_url": remove_url, "crn": course["crn"], }
-        self.logger.debug("Rendering email template")
-        body = self.__render_email_template(self.config["email"]["template"], content)
-        return Email(self.config["email"]["username"], recipient_email, subject, body)
 
     def __check_notify_status(self, watchee, current_status):
         """

@@ -177,10 +177,10 @@ class TestWatcherManager(unittest.TestCase):
                     self.assertTrue(self.watcher_m.is_watchee_removed(email, crn))
 
     def test_notify(self):
-        expected = self.add_test_watcher(200)
-        random_emails = {random.choice(list(expected.keys())) for _ in range(20)}
+        # expected = self.add_test_watcher(200)
+        # random_emails = {random.choice(list(expected.keys())) for _ in range(20)}
         # for email in random_emails:
-        self.watcher_m.add_watchee("lerryun@gmail.com", "00714")
+        self.watcher_m.add_watchee("lerryun@gmail.com", "00714", True)
         self.watcher_m.notify("lerryun@gmail.com")
 
 

@@ -6,10 +6,10 @@ from cn_v2.exception import CRNNotFound
 class CourseManager(BaseManager):
 
     def __init__(self, config_file, school, term_code=None, cursor=None):
-        super(CourseManager, self).__init__(config_file, school, cursor=None)
+        super(CourseManager, self).__init__(config_file, school, cursor=cursor)
         self.parser = CourseParser(config_file, school, term_code)
         self.logger.name = "CourseManager-%s" % school
-        self.logger.debug("Finish initializing manager")
+        self.logger.debug("Finish initializing %s" % self.logger.name)
 
     def __update_course_collection(self, data):
         self.logger.info("Updating course data in %s course collection" % self.school)
