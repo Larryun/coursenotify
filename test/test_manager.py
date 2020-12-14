@@ -180,8 +180,8 @@ class TestWatcherManager(unittest.TestCase):
         # expected = self.add_test_watcher(200)
         # random_emails = {random.choice(list(expected.keys())) for _ in range(20)}
         # for email in random_emails:
-        self.watcher_m.add_watchee("lerryun@gmail.com", "00714", True)
-        self.watcher_m.notify("lerryun@gmail.com")
+        self.watcher_m.add_all_watchee("lerryun@gmail.com", ["00714", "34065", "31752", "32473"], True)
+        # self.watcher_m.notify("lerryun@gmail.com")
 
 
 if __name__ == "__main__":

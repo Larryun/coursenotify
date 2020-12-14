@@ -69,38 +69,43 @@ class WatcherManager(BaseManager):
             "remove_key": gen_md5_key(course_id),
         })
 
-    def add_all_watchee(self, email, crn_list, confirmation=False):
-        """
-        add watchees by list of crns to a watcher with given email
-        :param email: watcher email
-        :param crn_list: array of crns to be added
-        :param confirmation: whether send confirmation email or not
-        :return:
-        """
-        for crn in crn_list:
-            self.add_watchee(email, crn, confirmation)
-
     def add_watchee(self, email, crn, confirmation=False):
         """
-        add a watchee with given crn to a watcher
+        add watchee by list of crn to a watcher with given email
         :param email: watcher email
-        :param crn: crn (Ex. 31234)
+        :param crn: crns to be added
         :param confirmation: whether send confirmation email or not
         :return:
         """
-        course = self.course_manger.find_course_by_crn(crn)
-        course_id = course["_id"]
-        watchee = WatcheeDocument(course_id)
-        if self.watcher_cc.count_documents({"email_addr": email, "crn.course_obj_id": course_id}) == 0:
-            self.logger.info("Add watchee %s to watcher %s" % (course_id, email))
-            self.watcher_cc.update_one({"email_addr": email},
-                                       {"$push": {"crn": watchee.__dict__}},
-                                       upsert=True)
-        else:
-            self.logger.info("Watchee %s already exists in watcher %s" % (course_id, email))
-            self.reset_watchee_status(email, course_id)
+        self.add_all_watchee(email, [crn], confirmation)
+
+    def add_all_watchee(self, email: str, crn: list, confirmation: bool = False):
+        """
+        add watchees with given crn to a watcher
+        :param email: watcher email
+        :param crn: List of crn (Ex. 31234)
+        :param confirmation: whether send confirmation email or not
+        :return:
+        """
+        remove_keys = []
+        courses = []
+
+        for c in crn:
+            course = self.course_manger.find_course_by_crn(c)
+            course_id = course["_id"]
+            watchee = WatcheeDocument(course_id)
+            if self.watcher_cc.count_documents({"email_addr": email, "crn.course_obj_id": course_id}) == 0:
+                self.logger.info("Add watchee %s to watcher %s" % (course_id, email))
+                self.watcher_cc.update_one({"email_addr": email},
+                                           {"$push": {"crn": watchee.__dict__}},
+                                           upsert=True)
+            else:
+                self.logger.info("Watchee %s already exists in watcher %s" % (course_id, email))
+                self.reset_watchee_status(email, course_id)
+            remove_keys.append(watchee.remove_key)
+            courses.append(course)
         if confirmation:
-            self.notify_manager.send_confirmation_email(watchee.remove_key, course, email)
+            self.notify_manager.send_confirmation_email(remove_keys, courses, email)
 
     # TODO: add test
     def remove_watchee_by_remove_key(self, remove_key):

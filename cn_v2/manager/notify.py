@@ -21,7 +21,7 @@ class NotifyManger(BaseManager):
 
         self.logger.debug("Finish initializing %s" % self.logger.name)
 
-    def send_email(self, email):
+    def send_email(self, email: Email):
         self.__get_email_client().send_email(email)
         self.logger.info("Sent email from %s to %s" % (email.sent_from, email.to))
 
@@ -46,7 +46,7 @@ class NotifyManger(BaseManager):
         body = self.__render_email_template(template, content)
         return Email(self.config["email"]["username"], recipient_email, subject, body)
 
-    def compose_notify_email(self, remove_key, course, recipient_email, template="", subject=""):
+    def compose_notify_email(self, remove_key, course, recipient_email):
         """
         Composes notification email that render template with some specific content
         :param remove_key: remove key
@@ -56,19 +56,29 @@ class NotifyManger(BaseManager):
         :param subject: subject of the email
         :return: composed Email object
         """
-        template = self.config["email"]["template"][template or "notify"]
-        subject = subject or "%s Class Notification" % self.school
+        template = self.config["email"]["template"]["notify"]
+        subject = "%s Class Notification" % self.school
 
-        remove_url = self.config["host-url"] + ("/%s/remove/%s" % (self.school.lower(), remove_key))
         content = {"status": course["status"],
                    "classname": course["name"],
-                   "remove_url": remove_url,
+                   "remove_url": self.__gen_remove_url(remove_key),
                    "crn": course["crn"], }
         return self.compose_email(subject, content, template, recipient_email)
 
-    def compose_conformation_email(self, remove_key, course, recipient_email):
+    def compose_conformation_email(self, remove_key: list, courses: list, recipient_email: str):
+        assert len(remove_key) == len(courses)
+        template = self.config["email"]["template"]["confirm"]
         subject = "%s CourseNotify Confirmation" % self.school
-        return self.compose_notify_email(remove_key, course, recipient_email, "confirm", subject)
+        content = {"courses": []}
+        for i in range(len(courses)):
+            d = {"status": courses[i]["status"],
+                 "classname": courses[i]["name"],
+                 "remove_url": self.__gen_remove_url(remove_key[i]),
+                 "crn": courses[i]["crn"]
+                 }
+            content["courses"].append(d)
+
+        return self.compose_email(subject, content, template, recipient_email)
 
     def __render_email_template(self, email_template, content):
         """
@@ -84,3 +94,6 @@ class NotifyManger(BaseManager):
         if self.email_client is None:
             self.email_client = GmailAccount(self.config["email"]["username"], self.config["email"]["pass"])
         return self.email_client
+
+    def __gen_remove_url(self, remove_key):
+        return self.config["host-url"] + ("/%s/remove/%s" % (self.school.lower(), remove_key))

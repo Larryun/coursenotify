@@ -1,10 +1,8 @@
 {% extends "base_email.html" %}
 {% block email_body %}
-    <div class="email_body">
-        <h1>Class {{ classname }}</h1>
-        <h1>Current status: <span style="color: #007bff">{{ status }}</span></h1>
-        <p>CRN: {{ crn }}</p>
-        <p> We will send you next notification if there are changes on seats availability</p>
-        <p> To stop watching this class, go <a href="{{ remove_url }}">here</a></p>
-    </div>
+    <h1>Class {{ classname }}</h1>
+    <h1>Current status: <span style="color: #007bff">{{ status }}</span></h1>
+    <p>CRN: {{ crn }}</p>
+    <p> We will send you next notification if there are changes on seats availability</p>
+    <p> To stop watching this class, go <a href="{{ remove_url }}">here</a></p>
 {% endblock %}

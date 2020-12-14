@@ -1,11 +1,27 @@
 {% extends "base_email.html" %}
 {% block email_body %}
-    <div class="email_body">
-        <h1>Class: {{ classname }} </h1>
-        <h1>Current status: <span style="color: #007bff">{{ status }}</span></h1>
-        <p>CRN: {{ crn }}</p>
-        <p> This is a confirmation email to inform you have successfully registered.</p>
-        <p> We will send you next notification if there are changes on seats availability</p>
-        <p> To stop watching this class, go <a href="{{ remove_url }}">here</a></p>
-    </div>
+    <b class="success-text"> This is a confirmation email to inform you have successfully registered.</b>
+    <table class="classes-table">
+        <th>CRN</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Remove</th>
+        {% for course in courses %}
+            <tr>
+                <td>{{ course.crn }}</td>
+                <td>{{ course.classname }}</td>
+                {% if course.status == "Open" %}
+                    <td class="green-cell">{{ course.status }}</td>
+                {% elif course.status == "Waitlist" %}
+                    <td class="blue-cell">{{ course.status }}</td>
+                {% elif course.status == "Full" %}
+                    <td class="red-cell">{{ course.status }}</td>
+                {% else %}
+                    <td>{{ course.status }}</td>
+                {% endif %}
+                <td><a href="{{ course.remove_url }}">remove</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <p> We will send you notifications if there are changes on seats availability</p>
 {% endblock %}

@@ -6,26 +6,55 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Course Notification</title>
     <style type="text/css">
-        * {
-            font-family: Arial, sans-serif;
-        }
+        {% block styles %}
+            * {
+                font-family: Arial, sans-serif;
+            }
 
-        .email-table {
-            background-color: aliceblue;
-            width: 100%;
-        }
+            .email-table {
+                background-color: aliceblue;
+                width: 100%;
+            }
 
-        .header-row {
-            text-align: center;
-            background-color: #f8f9fa;
-            font-size: 2rem;
-        }
+            .header-row {
+                text-align: center;
+                background-color: #f8f9fa;
+                font-size: 2rem;
+            }
 
-        .footer-row {
-            text-align: center;
-            background-color: #f8f9fa;
-            font-size: 0.5rem;
-        }
+            .footer-row {
+                text-align: center;
+                background-color: #f8f9fa;
+                font-size: 0.5rem;
+            }
+
+            .classes-table {
+                width: 100%;
+                text-align: center;
+                border-collapse: collapse;
+            }
+            .classes-table th, .classes-table td {
+                border: 1px solid black;
+            }
+
+            .red-cell {
+                background-color: #fc100d;
+            }
+
+            .blue-cell {
+                background-color: #1E92F4;
+
+            }
+            .green-cell {
+                background-color: #4BB543;
+            }
+
+            .success-text {
+                color: #0aa50a;
+                margin-bottom: 6px;
+            }
+
+        {% endblock %}
 
     </style>
 </head>
