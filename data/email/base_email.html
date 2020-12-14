@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Course Notification</title>
+    <style type="text/css">
+        * {
+            font-family: Arial, sans-serif;
+        }
+
+        .email-table {
+            background-color: aliceblue;
+            width: 100%;
+        }
+
+        .header-row {
+            text-align: center;
+            background-color: #f8f9fa;
+            font-size: 2rem;
+        }
+
+        .footer-row {
+            text-align: center;
+            background-color: #f8f9fa;
+            font-size: 0.5rem;
+        }
+
+    </style>
+</head>
+<body>
+<table class="email-table">
+    <tr class="header-row">
+        <td height="80px">
+            {% block title %}
+                FHDA CourseNotify
+            {% endblock %}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="email_body">
+                {% block email_body %}
+            </div>
+        </td>
+    </tr>
+    <tr class="footer-row">
+        <td height="30px">
+            <a href="http://coursenotify.com">FHDA CourseNotify v1.99</a><br>
+            <span style="color: #2870be">
+                    Note: This is not an official notification from FH/DA college.<br>
+                </span>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
