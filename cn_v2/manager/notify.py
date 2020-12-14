@@ -1,4 +1,4 @@
-from string import Template
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from cn_v2.manager.base import BaseManager
 from cn_v2.util.email import *
@@ -10,7 +10,15 @@ class NotifyManger(BaseManager):
         super(NotifyManger, self).__init__(config_file, school, cursor=cursor)
         self.logger.name = "NotifyManager-%s" % school
         self.logger.add_file_handler(log_path)
+
+        # TODO use celery work
         self.email_client = None
+
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(self.config["email"]["template"]["dir"]),
+            autoescape=select_autoescape(["html", "xml"])
+        )
+
         self.logger.debug("Finish initializing %s" % self.logger.name)
 
     def send_email(self, email):
@@ -62,16 +70,15 @@ class NotifyManger(BaseManager):
         subject = "%s CourseNotify Confirmation" % self.school
         return self.compose_notify_email(remove_key, course, recipient_email, "confirm", subject)
 
-    @staticmethod
-    def __render_email_template(email_template, content):
+    def __render_email_template(self, email_template, content):
         """
         Render a email template with the given content
         :param email_template: path to email template
         :param content: a dict, content to be substituted
         :return: rendered email in str
         """
-        with open(email_template) as f:
-            return Template(f.read()).substitute(content)
+        template = self.jinja_env.get_template(email_template)
+        return template.render(**content)
 
     def __get_email_client(self):
         if self.email_client is None:

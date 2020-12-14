@@ -1,6 +1,6 @@
 /venv/
 /data/*
-!/data/email
+!/cn_v2/email
 /cn_v2/CourseNotify_v2.egg-info/
 /dist/
 /CourseNotify.egg-info/

@@ -18,6 +18,9 @@ manager:
       course: ""
       watcher: ""
 email:
-  template: ""
   username: ""
   pass: ""
+  template:
+    dir: "template"
+    notify: "notify_email.html"
+    confirm: "confirmation_email.html"
