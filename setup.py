@@ -22,5 +22,6 @@ setuptools.setup(
         "requests>=2.22.0",
         "beautifulsoup4>=4.7.1",
         "PyYAML==5.3.1",
+        "Jinja2==2.11.2"
     ]
 )
