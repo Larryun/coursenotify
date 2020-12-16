@@ -6,10 +6,10 @@ from cn_v2.util.email import *
 
 class NotifyManger(BaseManager):
 
-    def __init__(self, config_file, school, log_path="../data/notify.log", cursor=None):
+    def __init__(self, config_file, school, cursor=None):
         super(NotifyManger, self).__init__(config_file, school, cursor=cursor)
         self.logger.name = "NotifyManager-%s" % school
-        self.logger.add_file_handler(log_path)
+        # self.logger.add_file_handler(log_path)
 
         # TODO use celery work
         self.email_client = None
