@@ -1,11 +1,11 @@
+from logging import INFO
+
 import pymongo
 from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
 
+from cn_v2.exception import SchoolInvalid
 from cn_v2.util.config import read_config
 from cn_v2.util.logger import BasicLogger
-from cn_v2.exception import SchoolInvalid
-
-from logging import DEBUG, INFO
 
 
 class BaseManager(object):
@@ -22,6 +22,7 @@ class BaseManager(object):
             self.logger = BasicLogger("BaseManager", level=INFO)
 
         # setting up mongodb cursor
+        self.cursor = None
         if not cursor:
             self.__setup_cursor()
         else:
@@ -69,5 +70,5 @@ class BaseManager(object):
                 handler.close()
                 self.logger.removeHandler(handler)
 
-        self.cursor.close()
-
+        if self.cursor is not None:
+            self.cursor.close()

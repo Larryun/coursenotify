@@ -11,10 +11,10 @@ class WatcherManager(BaseManager):
     WAITLIST = "Waitlist"
     OPEN = "Open"
 
-    def __init__(self, config_file, school, log_path="../data/watcher.log", cursor=None):
+    def __init__(self, config_file, school, cursor=None):
         super(WatcherManager, self).__init__(config_file, school, cursor=cursor)
         self.logger.name = "WatcherManager-%s" % school
-        self.logger.add_file_handler(log_path)
+        # self.logger.add_file_handler(log_path)
         self.course_manger = CourseManager(config_file, school, cursor=self.cursor)
         self.notify_manager = NotifyManger(config_file, school, cursor=self.cursor)
         self.logger.debug("Finish initializing %s" % self.logger.name)
