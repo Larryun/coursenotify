@@ -28,6 +28,14 @@ class WatcherManager(BaseManager):
         self.logger.debug("Querying all watchee of %s" % email)
         return list(self.watcher_cc.find({"email_addr": email}))
 
+    def get_emails(self):
+        """
+        Retrieve all watcher emails
+        :return: list of emails
+        """
+        res = self.watcher_cc.find({}, {"_id": 0, "email_addr": 1})
+        return [x["email_addr"] for x in res]
+
     def __update_watchee_status(self, email, course_id, new_status):
         """
         Update a watchee's  status (Ex. notify_status/notify_time... etc)
@@ -215,6 +223,14 @@ class WatcherManager(BaseManager):
                 self.update_watchee_notify_status(email, watchee["course_obj_id"], current_status)
                 notified_count += 1
         return notified_count
+
+    def notify_all(self):
+        """
+        Notify all watchers
+        :return:
+        """
+        for i in self.get_emails():
+            self.notify(i)
 
     def __check_notify_status(self, watchee, current_status):
         """

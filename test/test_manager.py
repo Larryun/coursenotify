@@ -37,6 +37,7 @@ class TestWatcherManager(unittest.TestCase):
         school = BaseManager.DA
         self.watcher_m = WatcherManager(CONFIG_FILE, school)
         self.course_m = CourseManager(CONFIG_FILE, school)
+        self.watcher_m.watcher_cc.delete_many({})
         # self.course_m.update_course_collection()
 
     def get_random_crn(self, size):
@@ -175,13 +176,21 @@ class TestWatcherManager(unittest.TestCase):
                     self.assertFalse(self.watcher_m.is_watchee_removed(email, crn))
                 else:
                     self.assertTrue(self.watcher_m.is_watchee_removed(email, crn))
+        self.drop_watchers(list(added.keys()))
 
-    def test_notify(self):
-        # expected = self.add_test_watcher(200)
-        # random_emails = {random.choice(list(expected.keys())) for _ in range(20)}
-        # for email in random_emails:
-        self.watcher_m.add_all_watchee("lerryun@gmail.com", ["00714", "34065", "31752", "32473"], True)
-        # self.watcher_m.notify("lerryun@gmail.com")
+    def test_get_emails(self):
+        added = self.add_test_watcher(100)
+
+        self.assertEqual(len(added.keys()), len(self.watcher_m.get_emails()))
+        self.drop_watchers(list(added.keys()))
+
+
+def test_notify(self):
+    # expected = self.add_test_watcher(200)
+    # random_emails = {random.choice(list(expected.keys())) for _ in range(20)}
+    # for email in random_emails:
+    self.watcher_m.add_all_watchee("lerryun@gmail.com", ["00714", "34065", "31752", "32473"], True)
+    # self.watcher_m.notify("lerryun@gmail.com")
 
 
 if __name__ == "__main__":
