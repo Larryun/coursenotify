@@ -51,6 +51,15 @@ class Parser(object):
 
 
 class CourseParser(Parser):
+    """
+        Handle parsing course data
+
+
+        Format for self.term_code:
+                First 4 digit = current year
+                5th digit     = quarter ( 1 ~ 4 / summer ~ spring)
+                6th digit     = school ( 1 = FH / 2 = DA )
+    """
     DA = "DA"
     FH = "FH"
     COURSE_URL = "https://ssb-prod.ec.fhda.edu/PROD/fhda_opencourses.P_GetCourseList"

@@ -18,11 +18,11 @@ class BaseManager(object):
             raise SchoolInvalid(school)
         self.config = read_config(config_file)
         self.logger = BasicLogger("BaseManager")
+        self.cursor = None
         if not self.config["debug"]:
             self.logger = BasicLogger("BaseManager", level=INFO)
 
         # setting up mongodb cursor
-        self.cursor = None
         if not cursor:
             self.__setup_cursor()
         else:
@@ -47,6 +47,7 @@ class BaseManager(object):
     def __create_cursor(self, ip, port, username, password, timeout=500):
         self.logger.debug("Connecting to DB")
         uri = "mongodb://%s:%s@%s:%s/?authSource=admin&authMechanism=SCRAM-SHA-1" % (username, password, ip, port)
+        self.logger.debug("Connecting using uri %s" % uri)
         return pymongo.MongoClient(uri, serverSelectionTimeoutMS=timeout)
 
     def check_mongo_connection(self):
